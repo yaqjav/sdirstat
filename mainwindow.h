@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -22,6 +22,7 @@ private:
 	void createMenus();
 	void createStatusBar();
 	void closeApplication();
+	void updateMemoryUsage();
 	// menu bar
 	QMenuBar* menuBar;
 	// file menu
@@ -37,5 +38,6 @@ private:
 	QAction* aboutAct;
 	// status bar
 	QLabel* ramLabel;
+	QTimer* updateMemoryTimer;
 };
 #endif // MAINWINDOW_H

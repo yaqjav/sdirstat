@@ -12,6 +12,10 @@ qt_add_executable(sdirstat
     mainwindow.h
 )
 
+target_compile_options(sdirstat PRIVATE
+    "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/utf-8>"
+)
+
 qt_add_resources(sdirstat "app_images"
     PREFIX "/"
     FILES assets/sdirstat.png

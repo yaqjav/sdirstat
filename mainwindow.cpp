@@ -1,8 +1,12 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include <QPushButton>
 #include <QLabel>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <Windows.h>
+#include <Psapi.h>
+#include <string> 
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,6 +15,13 @@ MainWindow::MainWindow(QWidget *parent)
     resize(1000, 650);
 
     createMenus();
+    createStatusBar();
+
+    updateMemoryTimer = new QTimer();
+    connect(updateMemoryTimer, &QTimer::timeout, 
+        this, &MainWindow::updateMemoryUsage);
+    updateMemoryUsage();
+    updateMemoryTimer->start(1000);
 }
 
 MainWindow::~MainWindow() = default;
@@ -35,6 +46,26 @@ void MainWindow::createMenus()
 void MainWindow::closeApplication()
 {
     close();
+}
+
+void MainWindow::updateMemoryUsage()
+{
+    PROCESS_MEMORY_COUNTERS memory{};
+    memory.cb = sizeof(memory);
+    BOOL success = GetProcessMemoryInfo(
+        GetCurrentProcess(),
+        &memory,
+        sizeof(memory)
+    );
+    
+    if (!success) {
+        ramLabel->setText("Użycie RAM: Błąd pobierania danych");
+        return;
+    }
+   
+    QString memSize = "Użycie RAM: " + QString::number(memory.WorkingSetSize 
+        / (static_cast<unsigned long long>(1024) * 1024)) + "MiB";
+    ramLabel->setText(memSize); // Memory size in MiB
 }
 
 void MainWindow::createActions()
@@ -64,13 +95,16 @@ void MainWindow::createActions()
 
 void MainWindow::createStatusBar()
 {
+    statusBar()->showMessage("Gotowy");
 
+    ramLabel = new QLabel("Użycie RAM: Oczekiwanie...");
+    statusBar()->addPermanentWidget(ramLabel);
 }
 
 #ifndef QT_NO_CONTEXTMENU
 void MainWindow::contextMenuEvent(QContextMenuEvent* event)
 {
-    // Obs�uga menu pod prawym przyciskiem myszy.
-    // Na obecnym etapie zostawiamy j� pust�.
+    // Obsługa menu pod prawym przyciskiem myszy.
+    // Na obecnym etapie zostawiamy ją pustą.
 }
 #endif
