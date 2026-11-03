@@ -23,6 +23,7 @@ private:
 	void createStatusBar();
 	void closeApplication();
 	void updateMemoryUsage();
+	void chooseFolder();
 	// menu bar
 	QMenuBar* menuBar;
 	// file menu
@@ -39,5 +40,8 @@ private:
 	// status bar
 	QLabel* ramLabel;
 	QTimer* updateMemoryTimer;
+	// selected folder
+	QLabel* folderLabel;
+	QString selectedFolder;
 };
 #endif // MAINWINDOW_H

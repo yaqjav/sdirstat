@@ -3,10 +3,11 @@
 #include <QLabel>
 #include <QMenuBar>
 #include <QStatusBar>
+#include <QTimer>
+#include <QFileDialog>
 #include <Windows.h>
 #include <Psapi.h>
 #include <string> 
-#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,7 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     createMenus();
     createStatusBar();
 
-    updateMemoryTimer = new QTimer();
+    // RAM Usage Timer
+    updateMemoryTimer = new QTimer(this);
     connect(updateMemoryTimer, &QTimer::timeout, 
         this, &MainWindow::updateMemoryUsage);
     updateMemoryUsage();
@@ -68,6 +70,21 @@ void MainWindow::updateMemoryUsage()
     ramLabel->setText(memSize); // Memory size in MiB
 }
 
+void MainWindow::chooseFolder()
+{
+    selectedFolder = QFileDialog::getExistingDirectory(this, tr("Wybierz folder skanownaia"),
+        QDir::homePath(),
+        QFileDialog::ShowDirsOnly
+        | QFileDialog::DontResolveSymlinks);
+
+    if (selectedFolder.isEmpty()) {
+        return;
+    }
+    else {
+        folderLabel->setText(selectedFolder);
+    }
+}
+
 void MainWindow::createActions()
 {
     // fileMenu Actions
@@ -91,13 +108,14 @@ void MainWindow::createActions()
     helpMenu->addAction(aboutAct);
 
     connect(exitAct, &QAction::triggered, this, &MainWindow::closeApplication);
+    connect(chooseFolderAct, &QAction::triggered, this, &MainWindow::chooseFolder);
 }
 
 void MainWindow::createStatusBar()
 {
-    statusBar()->showMessage("Gotowy");
-
+    folderLabel = new QLabel("Nie wybrano folderu");
     ramLabel = new QLabel("Użycie RAM: Oczekiwanie...");
+    statusBar()->addPermanentWidget(folderLabel, 1);
     statusBar()->addPermanentWidget(ramLabel);
 }
 
