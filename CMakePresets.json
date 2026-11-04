@@ -1,0 +1,31 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "mingw-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "$env{MINGW_ROOT}/bin/g++.exe",
+        "CMAKE_RC_COMPILER": "$env{MINGW_ROOT}/bin/windres.exe",
+        "CMAKE_PREFIX_PATH": "$env{QTDIR}",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true
+      },
+      "environment": {
+        "PATH": "$env{MINGW_ROOT}/bin;$env{QTDIR}/bin;$penv{PATH}"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "MinGW"
+        }
+      }
+    }
+  ]
+}
