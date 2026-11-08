@@ -7,8 +7,9 @@
 #include <QMessageBox>
 #include <QtConcurrentRun>
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
+#include "dialogs/sourcedialog.h"
+
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 {
     setWindowTitle("SDirStat");
     resize(1000, 650);
@@ -18,6 +19,8 @@ MainWindow::MainWindow(QWidget* parent)
     appStatusBar = new AppStatusBar(this);
     setStatusBar(appStatusBar);
 
+    connect(appMenuBar, &AppMenuBar::chooseDiskRequested,
+                this, &MainWindow::chooseDisk);
     connect(appMenuBar, &AppMenuBar::chooseFolderRequested,
             this, &MainWindow::chooseFolder);
     connect(appMenuBar, &AppMenuBar::cancelScanRequested,
@@ -46,7 +49,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
         {
             scanWatcher->cancel();
             QMainWindow::closeEvent(event);
-        } else
+        }
+        else
             event->ignore();
     }
 }
@@ -54,6 +58,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::closeApplication()
 {
     close();
+}
+
+void MainWindow::chooseDisk()
+{
+    SourceDialog dialog(this);
+    dialog.exec();
 }
 
 void MainWindow::chooseFolder()
@@ -87,14 +97,15 @@ void MainWindow::cancelScanning()
             this,
             "SDirStat",
             "Zatrzymano skanowanie!"
-            );
-    } else
+        );
+    }
+    else
     {
         QMessageBox::information(
             this,
             "SDirStat",
             "Skanowanie nie jest w toku!"
-            );
+        );
     }
 }
 

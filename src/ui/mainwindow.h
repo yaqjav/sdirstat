@@ -26,6 +26,7 @@ protected:
 
 private:
     void closeApplication();
+    void chooseDisk();
     void chooseFolder();
     void cancelScanning();
     void onScanFinished();

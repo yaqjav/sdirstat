@@ -41,6 +41,8 @@ void AppMenuBar::createActions()
     aboutAct = new QAction("O programie", this);
     helpMenu->addAction(aboutAct);
 
+    connect(chooseDiskAct, &QAction::triggered,
+            this, &AppMenuBar::chooseDiskRequested);
     connect(chooseFolderAct, &QAction::triggered,
             this, &AppMenuBar::chooseFolderRequested);
     connect(cancelScanningAct, &QAction::triggered,

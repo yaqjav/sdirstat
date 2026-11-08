@@ -18,6 +18,8 @@ qt_add_executable(sdirstat
         src/ui/app_menu_bar.h
         src/ui/app_status_bar.cpp
         src/ui/app_status_bar.h
+        src/ui/dialogs/sourcedialog.cpp
+        src/ui/dialogs/sourcedialog.h
 )
 
 target_compile_features(sdirstat PRIVATE cxx_std_17)

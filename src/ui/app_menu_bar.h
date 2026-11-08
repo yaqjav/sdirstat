@@ -11,6 +11,7 @@ public:
     explicit AppMenuBar(QWidget* parent = nullptr);
 
 signals:
+    void chooseDiskRequested();
     void chooseFolderRequested();
     void cancelScanRequested();
     void exitRequested();
