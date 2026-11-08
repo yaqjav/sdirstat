@@ -1,33 +1,33 @@
-//
-// Created by Kuba on 5.11.2026.
-//
-
 #ifndef SDIRSTAT_APP_MENU_BAR_H
 #define SDIRSTAT_APP_MENU_BAR_H
 
 #include <QMenuBar>
 
-class app_menu_bar : public QMenuBar
+class AppMenuBar : public QMenuBar
 {
+    Q_OBJECT
+
 public:
+    explicit AppMenuBar(QWidget* parent = nullptr);
+
+signals:
+    void chooseFolderRequested();
+    void cancelScanRequested();
+    void exitRequested();
+
+private:
     void createMenus();
     void createActions();
 
-private:
-    // menu bar
-    QMenuBar* menuBar{};
-    // file menu
     QMenu* fileMenu{};
+    QMenu* helpMenu{};
     QAction* chooseDiskAct{};
     QAction* chooseFolderAct{};
     QAction* cancelScanningAct{};
     QAction* importAct{};
     QAction* exportAct{};
     QAction* exitAct{};
-    // help menu
-    QMenu* helpMenu{};
     QAction* aboutAct{};
 };
 
-
-#endif //SDIRSTAT_APP_MENU_BAR_H
+#endif // SDIRSTAT_APP_MENU_BAR_H

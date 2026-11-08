@@ -1,4 +1,4 @@
-﻿#include "../../size_tools.h"
+#include "size_tools.h"
 
 #include <QString>
 #include <QVector>

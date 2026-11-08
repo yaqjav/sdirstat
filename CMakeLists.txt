@@ -15,13 +15,16 @@ qt_add_executable(sdirstat
         src/scanning/scanner.cpp
         src/scanning/scanner.h
         src/ui/app_menu_bar.cpp
-        src/ui/app_menu_bar.cpp
         src/ui/app_menu_bar.h
         src/ui/app_status_bar.cpp
         src/ui/app_status_bar.h
 )
 
 target_compile_features(sdirstat PRIVATE cxx_std_17)
+
+target_include_directories(sdirstat PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
 
 target_compile_options(sdirstat PRIVATE
         "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/utf-8>"

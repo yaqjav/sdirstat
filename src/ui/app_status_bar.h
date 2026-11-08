@@ -1,29 +1,26 @@
-//
-// Created by Kuba on 5.11.2026.
-//
-
 #ifndef SDIRSTAT_APP_STATUS_BAR_H
 #define SDIRSTAT_APP_STATUS_BAR_H
 
-#include <QString>
-#include <QTimer>
 #include <QLabel>
 #include <QStatusBar>
+#include <QString>
+#include <QTimer>
 
-class app_status_bar : public QStatusBar
+class AppStatusBar : public QStatusBar
 {
+    Q_OBJECT
+
 public:
-    void createStatusBar();
-	void updateMemoryUsage() const;
+    explicit AppStatusBar(QWidget* parent = nullptr);
+    void setFolderPath(const QString& path);
 
 private:
-    // status bar
+    void createStatusBar();
+    void updateMemoryUsage() const;
+
     QLabel* ramLabel{};
-    QTimer* updateMemoryTimer;
-    // selected folder
     QLabel* folderLabel{};
-    QString selectedFolder;
+    QTimer* updateMemoryTimer{};
 };
 
-
-#endif //SDIRSTAT_APP_STATUS_BAR_H
+#endif // SDIRSTAT_APP_STATUS_BAR_H
