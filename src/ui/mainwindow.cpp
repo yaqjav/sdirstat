@@ -1,15 +1,24 @@
-﻿#include "mainwindow.h"
+﻿#include "../../mainwindow.h"
+#include "../utils/size_tools.h"
+#include "../scanning/scanner.h"
 #include <QPushButton>
 #include <QLabel>
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QTimer>
+#include <QMessageBox>
 #include <QFileDialog>
+#include <QDirListing>
+#include <QCloseEvent>
+#include <QtConcurrentRun>
+#include <QDir>
+#include <QFlags>
+#include <QDebug>
 #include <Windows.h>
 #include <Psapi.h>
-#include <string> 
+#include <string>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
     setWindowTitle("SDirStat");
@@ -20,10 +29,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     // RAM Usage Timer
     updateMemoryTimer = new QTimer(this);
-    connect(updateMemoryTimer, &QTimer::timeout, 
-        this, &MainWindow::updateMemoryUsage);
+    connect(updateMemoryTimer, &QTimer::timeout,
+            this, &MainWindow::updateMemoryUsage);
     updateMemoryUsage();
     updateMemoryTimer->start(1000);
+
+    scanWatcher = new QFutureWatcher<ScanResult>(this);
+    connect(scanWatcher, &QFutureWatcher<ScanResult>::finished,
+            this, &MainWindow::onScanFinished);
 }
 
 MainWindow::~MainWindow() = default;
@@ -45,12 +58,31 @@ void MainWindow::createMenus()
     createActions();
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (scanWatcher->isRunning())
+    {
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "SDirStat",
+            "Skanowanie jest w toku, czy chcesz je przerwać?",
+            QMessageBox::Yes | QMessageBox::No
+        );
+        if (reply == QMessageBox::Yes)
+        {
+            scanWatcher->cancel();
+            QMainWindow::closeEvent(event);
+        } else
+            event->ignore();
+    }
+}
+
 void MainWindow::closeApplication()
 {
     close();
 }
 
-void MainWindow::updateMemoryUsage()
+void MainWindow::updateMemoryUsage() const
 {
     PROCESS_MEMORY_COUNTERS memory{};
     memory.cb = sizeof(memory);
@@ -59,30 +91,65 @@ void MainWindow::updateMemoryUsage()
         &memory,
         sizeof(memory)
     );
-    
-    if (!success) {
+
+    if (!success)
+    {
         ramLabel->setText("Użycie RAM: Błąd pobierania danych");
         return;
     }
-   
-    QString memSize = "Użycie RAM: " + QString::number(memory.WorkingSetSize 
-        / (static_cast<unsigned long long>(1024) * 1024)) + "MiB";
+
+    QString memSize = "Użycie RAM: " + getSizeWithUnit(static_cast<qint64>(memory.WorkingSetSize));
     ramLabel->setText(memSize); // Memory size in MiB
 }
 
 void MainWindow::chooseFolder()
 {
-    selectedFolder = QFileDialog::getExistingDirectory(this, tr("Wybierz folder skanownaia"),
-        QDir::homePath(),
-        QFileDialog::ShowDirsOnly
-        | QFileDialog::DontResolveSymlinks);
+    if (scanWatcher->isRunning()) return;
 
-    if (selectedFolder.isEmpty()) {
+    selectedFolder = QFileDialog::getExistingDirectory(this, tr("Wybierz folder skanowania"),
+                                                       QDir::homePath(),
+                                                       QFileDialog::ShowDirsOnly
+                                                       | QFileDialog::DontResolveSymlinks);
+
+    if (selectedFolder.isEmpty())
+    {
         return;
     }
-    else {
+    else
+    {
         folderLabel->setText(selectedFolder);
+        scanWatcher->setFuture(
+            QtConcurrent::run(scanFolder, selectedFolder)
+        );
     }
+}
+
+void MainWindow::cancelScanning()
+{
+    if (scanWatcher->isRunning())
+    {
+        scanWatcher->cancel();
+        QMessageBox::warning(
+            this,
+            "SDirStat",
+            "Zatrzymano skanowanie!"
+            );
+    } else
+    {
+        QMessageBox::information(
+            this,
+            "SDirStat",
+            "Skanowanie nie jest w toku!"
+            );
+    }
+}
+
+void MainWindow::onScanFinished()
+{
+    if (scanWatcher->isCanceled()) return;
+    const ScanResult result = scanWatcher->result();
+    qDebug() << "path: " << selectedFolder << " :: size: " << getSizeWithUnit(result.totalBytes) << " :: amount: " <<
+        result.fileCount << "\n";
 }
 
 void MainWindow::createActions()
@@ -93,7 +160,7 @@ void MainWindow::createActions()
     cancelScanningAct = new QAction("Anuluj skanowanie");
     exitAct = new QAction("Zamknij");
     importAct = new QAction("Importuj dane skanowania z CSV/JSON");
-    exportAct = new QAction("Eskportuj dane skanowania do CSV/JSON");
+    exportAct = new QAction("Eksportuj dane skanowania do CSV/JSON");
     fileMenu->addAction(chooseDiskAct);
     fileMenu->addAction(chooseFolderAct);
     fileMenu->addAction(cancelScanningAct);
@@ -109,6 +176,7 @@ void MainWindow::createActions()
 
     connect(exitAct, &QAction::triggered, this, &MainWindow::closeApplication);
     connect(chooseFolderAct, &QAction::triggered, this, &MainWindow::chooseFolder);
+    connect(cancelScanningAct, &QAction::triggered, this, &MainWindow::cancelScanning);
 }
 
 void MainWindow::createStatusBar()

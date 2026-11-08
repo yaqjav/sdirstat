@@ -1,17 +1,24 @@
 cmake_minimum_required(VERSION 3.19)
 project(sdirstat LANGUAGES CXX)
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Core Widgets Concurrent)
 
 qt_standard_project_setup()
 
 qt_add_executable(sdirstat
         WIN32 MACOSX_BUNDLE
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        size_tools.cpp
-        size_tools.h
+        src/main.cpp
+        src/ui/mainwindow.cpp
+        src/ui/mainwindow.h
+        src/utils/size_tools.cpp
+        src/utils/size_tools.h
+        src/scanning/scanner.cpp
+        src/scanning/scanner.h
+        src/ui/app_menu_bar.cpp
+        src/ui/app_menu_bar.cpp
+        src/ui/app_menu_bar.h
+        src/ui/app_status_bar.cpp
+        src/ui/app_status_bar.h
 )
 
 target_compile_features(sdirstat PRIVATE cxx_std_17)
@@ -29,6 +36,7 @@ target_link_libraries(sdirstat
         PRIVATE
         Qt::Core
         Qt::Widgets
+        Qt::Concurrent
 )
 
 install(TARGETS sdirstat

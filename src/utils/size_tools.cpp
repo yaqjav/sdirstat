@@ -1,4 +1,4 @@
-﻿#include "size_tools.h"
+﻿#include "../../size_tools.h"
 
 #include <QString>
 #include <QVector>
@@ -16,5 +16,5 @@ QString getSizeWithUnit(const qint64 sizeB, const int precision)
         size /= static_cast<double>(1024);
         i++;
     }
-    return QString::number(size, 'g', precision) + " " + units[i];
+    return QString::number(size, 'f', precision) + " " + units[i];
 }
